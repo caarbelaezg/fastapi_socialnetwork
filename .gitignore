@@ -1,0 +1,65 @@
+# Entornos virtuales
+env/
+venv/
+env3.*/
+.venv/
+
+# Archivos de configuración sensibles
+.env
+*.env
+
+# Cachés y archivos temporales de Python
+__pycache__/
+*.py[cod]
+*$py.class
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Archivos de bases de datos locales
+*.db
+test.db
+
+# Archivos de registro
+*.log
+log.txt
+
+# Directorios de construcción y distribución
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+MANIFEST
+
+# Archivos comprimidos y de empaquetado
+*.zip
+*.tar.gz
+*.rar
+*.7z
+docs_build/
+site_build/
+docs.zip
+archive.zip
+
+# Configuraciones de editores y entornos de desarrollo
+.vscode/
+.idea/
+*.sublime-*
+*.swp
+*~
+
+# Archivos específicos de macOS
+.DS_Store
+
+# Archivos específicos de Netlify
+.netlify/
+
+# Archivos de configuración de pipenv
+Pipfile.lock
+
+# Otros archivos y directorios a ignorar
+.cache/
+site/
