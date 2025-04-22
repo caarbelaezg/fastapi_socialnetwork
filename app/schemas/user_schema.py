@@ -1,11 +1,19 @@
-from pydantic import BaseModel
-from typing import List
+from pydantic import BaseModel, ConfigDict
+from typing import List, Optional
+import uuid
 
 class UserSchema(BaseModel):
-    id: int
+    id: uuid.UUID
     name: str
     email: str
-    friends: List[int] = []
+    friends: List[uuid.UUID] = []
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+
+class UserCreateSchema(BaseModel):
+    name: str
+    email: str
+
+class UserUpdateSchema(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None

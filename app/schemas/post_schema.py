@@ -1,11 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+import uuid
+from datetime import datetime
 
 class PostSchema(BaseModel):
-    id: int
-    title: str
+    id: uuid.UUID
     content: str
-    user_id: int
-    likes: int
+    timestamp: datetime
+    user_id: uuid.UUID
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+
+class PostCreateSchema(BaseModel):
+    content: str

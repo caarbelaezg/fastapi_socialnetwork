@@ -1,48 +1,59 @@
 from typing import List, Optional
-from app.schemas.user_schema import UserSchema
-from app.database.database import users_db
+from sqlalchemy.orm import Session
+import uuid
 
-def get_all_users() -> List[UserSchema]:
-    return users_db
+from app.models.user_model import User
+from app.schemas.user_schema import UserSchema, UserCreateSchema, UserUpdateSchema
 
-def create_user(user: UserSchema) -> UserSchema:
-    if any(existing_user.id == user.id for existing_user in users_db):
-        raise ValueError("The user already exists")
-    users_db.append(user)
+def get_all_users(db: Session) -> List[User]:
+    return db.query(User).all()
+
+def create_user(db: Session, user: UserCreateSchema) -> User:
+    db_user = User(
+        name=user.name, 
+        email=user.email
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def get_user_by_id(db: Session, user_id: uuid.UUID) -> Optional[User]:
+    return db.query(User).filter(User.id == user_id).first()
+
+def get_user_by_email(db: Session, email: str) -> Optional[User]:
+    return db.query(User).filter(User.email == email).first()
+
+def update_user(db: Session, user_id: uuid.UUID, user_data: UserUpdateSchema) -> Optional[User]:
+    db_user = get_user_by_id(db, user_id)
+    if not db_user:
+        return None
+    
+    user_data_dict = user_data.model_dump(exclude_unset=True)
+    for key, value in user_data_dict.items():
+        setattr(db_user, key, value)
+    
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def delete_user(db: Session, user_id: uuid.UUID) -> bool:
+    db_user = get_user_by_id(db, user_id)
+    if not db_user:
+        return False
+    
+    db.delete(db_user)
+    db.commit()
+    return True
+
+def add_friend(db: Session, user_id: uuid.UUID, friend_id: uuid.UUID) -> Optional[User]:
+    user = get_user_by_id(db, user_id)
+    friend = get_user_by_id(db, friend_id)
+    
+    if not user or not friend:
+        return None
+    
+    user.friends.append(friend)
+    db.commit()
+    db.refresh(user)
     return user
-
-def get_user_by_id(user_id: int) -> Optional[UserSchema]:
-    for user in users_db:
-        if user.id == user_id:
-            return user
-    return None
-
-def update_user(user_id: int, updated_user: UserSchema) -> UserSchema:
-    for index, user in enumerate(users_db):
-        if user.id == user_id:
-            users_db[index] = updated_user
-            return updated_user
-    raise ValueError("User not found")
-
-def delete_user(user_id: int) -> bool:
-    global users_db
-    for user in users_db:
-        if user.id == user_id:
-            users_db.remove(user)
-            return True
-    raise ValueError("User not found")
-
-def add_friend(user_id: int, friend_id: int) -> UserSchema:
-    user = get_user_by_id(user_id)
-    if user is None:
-        raise ValueError("User not found")
-    
-    friend = get_user_by_id(friend_id)
-    if friend is None:
-        raise ValueError("Friend not found")
-    
-    if friend_id not in user.friends:
-        user.friends.append(friend_id)
-    
-    return user
-    
